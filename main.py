@@ -4,6 +4,14 @@ import plotly.express as px
 import plotly.graph_objects as go
 import prepro
 import ollama
+import joblib 
+from darts import TimeSeries
+from darts.models import NBEATSModel
+from darts.dataprocessing.transformers import Scaler
+from darts.utils.timeseries_generation import datetime_attribute_timeseries
+from darts.utils.timeseries_generation import holidays_timeseries
+from darts.metrics import mape
+
 st.set_page_config(layout="wide", page_title="Dashboard Group 15", page_icon="📊")
 st.title("Adashboard By Group 15")
 
@@ -112,26 +120,33 @@ elif st.session_state.page == "Dashboard":
                 fig = px.line(salesVsTime, x="Tanggal & Waktu", y="banyak_jenis_produk", title="Banyak Ragam Produk Seiring Waktu")
                 st.plotly_chart(fig)
             with col2:
-                datasales=salesVsTime[["Tanggal & Waktu", "nominal_transaksi"]].copy()
-                datasales.set_index('Tanggal & Waktu', inplace=True)
-                fig = px.line(datasales, x=datasales.index , y="nominal_transaksi", title="Banyak Pemasukan Seiring Waktu")
-                st.plotly_chart(fig, use_container_width=True)
-                if st.button('Make Prediction'):
-                    predicted_values, model, scaler = prepro.fine_tune_and_predict(datasales)
-                    future_dates = pd.date_range(start=datasales.index[-1], periods=len(predicted_values) + 1, freq='D')[1:]
-                    predicted_df = pd.DataFrame({'Tanggal & Waktu': future_dates, 'nominal_transaksi': predicted_values})
-                    predicted_df.set_index('Tanggal & Waktu', inplace=True)
-                    fig.add_traces(
-                        go.Scatter(
-                            x=predicted_df.index, 
-                            y=predicted_df['nominal_transaksi'], 
-                            mode='lines', 
-                            name='Predictions',
-                            line=dict(color='red', dash='dash')
-                        )
-                    )
-                    fig.update_layout(title="Banyak Pemasukan Seiring Waktu (with Prediction)")
-                    st.plotly_chart(fig, use_container_width=True)   
+                 loaded_model = NBEATSModel.load("forecasting_model20.pth")
+                 loaded_scaler = joblib.load("scaler.save")
+                 forecast_loaded_scaled = loaded_model.predict(n=7)
+                 forecast_loaded_actual = loaded_scaler.inverse_transform(forecast_loaded_scaled)
+                 forecast_loaded_values = forecast_loaded_actual.univariate_values()
+                 forecast_loaded_dates = forecast_loaded_actual.time_index
+                 fig = go.Figure()
+                 fig.add_trace(go.Scatter(
+                      x=salesVsTime['Tanggal & Waktu'],
+                      y=salesVsTime['nominal_transaksi'],
+                      mode='lines',
+                      name='actual',
+                      line=dict(color='blue')
+                      ))
+                 fig.add_trace(go.Scatter(
+                      x=forecast_loaded_dates,
+                      y=forecast_loaded_values,
+                      mode='lines',
+                      name='Forecast',
+                      line=dict(color='red', dash='dash')
+                      ))
+                 fig.update_layout(
+                      title='Prediksi Total Penjualan 7 Hari ke Depan',
+                      xaxis_title='Tanggal',
+                      yaxis_title='Total Penjualan'
+                      )
+                 st.plotly_chart(fig)
     #Product Dashboard             
     with st.container() : 
         col21, col22 = st.columns(2)
@@ -223,7 +238,7 @@ elif st.session_state.page == "Dashboard":
                 )
                 st.plotly_chart(fig, use_container_width=True)
     with st.container(): 
-        st.title("🤖 Simple Chatbot with OpenAI")
+        st.title("🤖 Simple Chatbot with Adashboard")
         client = ollama.Client()
         model  = "granite3-dense:2b"
 
@@ -239,7 +254,7 @@ elif st.session_state.page == "Dashboard":
                 st.markdown(user_input)
             with st.chat_message("assistant"):
                 with st.spinner("Thinking..."):
-                    response = client.generate(model=model, prompt=user_input)
+                    response = client.generate(model=model, prompt=(user_input))
                     st.markdown(response.response)
             st.session_state.messages.append({"role": "assistant", "content": response.response})
 

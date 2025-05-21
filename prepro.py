@@ -9,42 +9,12 @@ from pytorch_forecasting import TimeSeriesDataSet, NBeats
 from pytorch_forecasting.data import GroupNormalizer
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
-
-def fine_tune_and_predict(data):
-    data['time_idx'] = np.arange(len(data))
-    scaler = MinMaxScaler()
-    data['nominal_transaksi'] = scaler.fit_transform(data[['nominal_transaksi']])
-    train_data = data[:int(len(data) * 0.8)]
-    val_data = data[int(len(data) * 0.8):]
-    max_encoder_length = 20 
-    max_prediction_length = 7 
-    training = TimeSeriesDataSet(
-        train_data,
-        time_idx="time_idx",
-        target="nominal_transaksi",
-        group_ids=["time_idx"],  # The group ID for time series
-        min_encoder_length=max_encoder_length,
-        max_encoder_length=max_encoder_length,
-        min_prediction_length=max_prediction_length,
-        max_prediction_length=max_prediction_length,
-        static_categoricals=[],  # No static categorical features
-        static_reals=[],  # No static real features
-        time_varying_known_categoricals=[],  # No known categorical features
-        time_varying_known_reals=["time_idx"],  # The time index is known
-        time_varying_unknown_categoricals=[],  # No unknown categorical features
-        time_varying_unknown_reals=["nominal_transaksi"],  # The value is unknown and to be predicted
-        target_normalizer=GroupNormalizer(groups=["time_idx"], transformation="softplus"),
-    )
-    trainer = Trainer(max_epochs=10, gpus=1)
-    model = NBeats.from_dataset(training, learning_rate=0.001, hidden_size=64, batch_size=64)
-    trainer.fit(model, train_dataloader=DataLoader(training, batch_size=64, shuffle=True))
-    input_data = data['nominal_transaksi'][-30:]
-    input_tensor = torch.tensor(input_data.values, dtype=torch.float32).unsqueeze(0)
-    predictions = model(input_tensor)
-    predicted_values = predictions.squeeze().detach().numpy()
-    predicted_values = scaler.inverse_transform(predicted_values.reshape(-1, 1)).flatten()
-
-    return predicted_values, model, scaler
+from darts import TimeSeries
+from darts.models import NBEATSModel
+from darts.dataprocessing.transformers import Scaler
+from darts.utils.timeseries_generation import datetime_attribute_timeseries
+from darts.utils.timeseries_generation import holidays_timeseries
+from darts.metrics import mape
 
 def fix_column_name(df, names) : 
     df = df.rename(columns={v: k for k, v in names.items()})
