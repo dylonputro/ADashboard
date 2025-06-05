@@ -61,7 +61,8 @@ if st.session_state.page == "upload":
         if st.sidebar.button("Continue to Dashboard"):
             st.session_state.page = "Dashboard"
             st.session_state.df = prepro.clean_data(st.session_state.df)
-            st.rerun()
+            st.rerun()  # dipanggil hanya saat button diklik
+
 
 elif st.session_state.page == "Dashboard":
     if st.session_state.df is None:
