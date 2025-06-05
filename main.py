@@ -61,7 +61,7 @@ if page == "Upload Data":
                 # Clean data and set a flag to indicate that we can proceed to the dashboard
                 st.session_state.df = prepro.clean_data(st.session_state.df)
                 st.session_state.page = "Dashboard"  # Change the page to Dashboard
-                st.experimental_rerun()  # Rerun the app to reflect the new page
+                st.rerun()  # Rerun the app to reflect the new page
 
 
 # Dashboard Page
