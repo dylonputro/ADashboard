@@ -232,7 +232,7 @@ elif st.session_state.page == "Dashboard":
                 )
                 st.plotly_chart(fig, use_container_width=True)
             
-    with st.container(): 
+    with st.container():
     st.title("🤖 Simple Chatbot with OpenAI")
 
     # Setup OpenAI API key
@@ -261,3 +261,4 @@ elif st.session_state.page == "Dashboard":
                 assistant_message = response.choices[0].message["content"]
                 st.session_state.messages.append({"role": "assistant", "content": assistant_message})
                 st.markdown(assistant_message)
+
