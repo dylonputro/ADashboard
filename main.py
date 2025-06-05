@@ -54,11 +54,11 @@ if page == "Upload Data":
                 )
             if st.button("Terapkan Mapping"):
                 st.session_state.df = prepro.fix_column_name(st.session_state.df, st.session_state.column_mapping)
-                st.experimental_rerun()
+                st.rerun()
 
         if st.button("Lanjut ke Dashboard"):
             st.session_state.df = prepro.clean_data(st.session_state.df)
-            st.experimental_rerun()
+            st.rerun()
 
 # --- Dashboard Page ---
 elif page == "Dashboard" and st.session_state.df is not None:
