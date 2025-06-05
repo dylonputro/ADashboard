@@ -50,6 +50,8 @@ if "df" not in st.session_state:
     st.session_state.df = None
 if "column_mapping" not in st.session_state:
     st.session_state.column_mapping = {}
+if "data_loaded" not in st.session_state:
+    st.session_state.data_loaded = False
 
 if page == "Upload Data":
     # Drag and drop feature
@@ -78,12 +80,12 @@ if page == "Upload Data":
                 if st.button("Continue"):
                     if st.session_state.df is not None:
                         st.session_state.df = prepro.clean_data(st.session_state.df)
-                        st.experimental_rerun()
+                        st.session_state.data_loaded = True  # Set flag to indicate data is loaded
         except Exception as e:
             st.error(f"An error occurred while loading the data: {e}")
 
 elif page == "Dashboard":
-    if st.session_state.df is not None:
+    if st.session_state.data_loaded:  # Check if data is loaded
         try:
             salesVsTime = prepro.prep_sales(st.session_state.df)
             groupByCustomer = prepro.prep_customer(st.session_state.df)
