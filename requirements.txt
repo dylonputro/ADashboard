@@ -16,4 +16,4 @@ transformers
 langchain
 langchain-community
 u8darts
-
+openai
