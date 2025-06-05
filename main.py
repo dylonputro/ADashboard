@@ -197,5 +197,20 @@ elif st.session_state.page == "Dashboard":
             clusteringmask = groupByCustomer[groupByCustomer["cluster"] == option1]
         st.dataframe(clusteringmask)
 
-# Jika butuh debug session state
-# st.write(st.session_state)
+    # --- Chatbot Section ---
+    st.header("Chatbot Assistant")
+    chat_container = st.container()
+
+    for msg in st.session_state["messages"]:
+        if msg["role"] == "assistant":
+            chat_container.markdown(f"**Assistant:** {msg['content']}")
+        else:
+            chat_container.markdown(f"**You:** {msg['content']}")
+
+    user_input = st.text_input("Your message:", key="chat_input")
+    if st.button("Send", key="send_button"):
+        if user_input:
+            st.session_state["messages"].append({"role": "user", "content": user_input})
+            response = ollama.ask(user_input)  # Ganti dengan fungsi chatbot yang kamu punya
+            st.session_state["messages"].append({"role": "assistant", "content": response})
+            st.experimental_rerun()
