@@ -1,0 +1,16 @@
+pandas
+numpy
+streamlit
+plotly
+ollama
+joblib
+scikit-learn
+torch
+pytorch-lightning
+pytorch-forecasting
+neuralforecast
+prophet
+statsmodels
+transformers
+langchain
+langchain-community
