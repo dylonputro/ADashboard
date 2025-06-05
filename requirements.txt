@@ -15,4 +15,5 @@ statsmodels
 transformers
 langchain
 langchain-community
-darts
+u8darts
+
