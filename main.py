@@ -233,32 +233,32 @@ elif st.session_state.page == "Dashboard":
                 st.plotly_chart(fig, use_container_width=True)
             
     with st.container():
-    st.title("🤖 Simple Chatbot with OpenAI")
-
-    # Setup OpenAI API key
-    openai.api_key = st.secrets["openai_api_key"]
+        st.title("🤖 Simple Chatbot with OpenAI")
     
-    if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": "You are a helpful assistant."}]
-    
-    # Display previous messages
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-    
-    # User input
-    user_input = st.chat_input("Type your message...")
-    if user_input:
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        with st.chat_message("user"):
-            st.markdown(user_input)
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = openai.ChatCompletion.create(
-                    model="gpt-4o-mini",
-                    messages=st.session_state.messages,
-                )
-                assistant_message = response.choices[0].message["content"]
-                st.session_state.messages.append({"role": "assistant", "content": assistant_message})
-                st.markdown(assistant_message)
+        # Setup OpenAI API key
+        openai.api_key = st.secrets["openai_api_key"]
+        
+        if "messages" not in st.session_state:
+            st.session_state["messages"] = [{"role": "system", "content": "You are a helpful assistant."}]
+        
+        # Display previous messages
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+        
+        # User input
+        user_input = st.chat_input("Type your message...")
+        if user_input:
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            with st.chat_message("user"):
+                st.markdown(user_input)
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    response = openai.ChatCompletion.create(
+                        model="gpt-4o-mini",
+                        messages=st.session_state.messages,
+                    )
+                    assistant_message = response.choices[0].message["content"]
+                    st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+                    st.markdown(assistant_message)
 
