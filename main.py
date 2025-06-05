@@ -11,18 +11,9 @@ from darts.dataprocessing.transformers import Scaler
 from darts.utils.timeseries_generation import datetime_attribute_timeseries
 from darts.utils.timeseries_generation import holidays_timeseries
 from darts.metrics import mape
-
+import openai
 st.set_page_config(layout="wide", page_title="Dashboard Group 15", page_icon="📊")
 st.title("Adashboard By Group 15")
-
-import pandas as pd 
-import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
-import prepro
-import ollama
-import openai
-
 
 
 #Fungsi read data 
@@ -245,17 +236,17 @@ elif st.session_state.page == "Dashboard":
     st.title("🤖 Simple Chatbot with OpenAI")
 
     # Setup OpenAI API key
-    openai.api_key = st.secrets["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"]  # simpan API key di Streamlit secrets atau bisa juga set manual
-
+    openai.api_key = st.secrets["openai_api_key"]
+    
     if "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "system", "content": "You are a helpful assistant."}]
-
-    # Tampilkan pesan sebelumnya
+    
+    # Display previous messages
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
-
-    # Input user
+    
+    # User input
     user_input = st.chat_input("Type your message...")
     if user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
@@ -263,13 +254,10 @@ elif st.session_state.page == "Dashboard":
             st.markdown(user_input)
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                # Panggil OpenAI API ChatCompletion
                 response = openai.ChatCompletion.create(
-                    model="gpt-4o-mini",  # atau model lain yang kamu inginkan
+                    model="gpt-4o-mini",
                     messages=st.session_state.messages,
-                    max_tokens=500,
-                    temperature=0.7,
                 )
-                assistant_reply = response['choices'][0]['message']['content']
-                st.markdown(assistant_reply)
-                st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+                assistant_message = response.choices[0].message["content"]
+                st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+                st.markdown(assistant_message)
