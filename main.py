@@ -11,7 +11,6 @@ from darts.dataprocessing.transformers import Scaler
 from darts.utils.timeseries_generation import datetime_attribute_timeseries
 from darts.utils.timeseries_generation import holidays_timeseries
 from darts.metrics import mape
-import openai
 
 st.set_page_config(layout="wide", page_title="Dashboard Group 15", page_icon="📊")
 st.title("Adashboard By Group 15")
@@ -238,21 +237,16 @@ elif st.session_state.page == "Dashboard":
                     height=150  
                 )
                 st.plotly_chart(fig, use_container_width=True)
-    with st.container():
-        st.title("🤖 Simple Chatbot with OpenAI")
-    
-        # Setup OpenAI API key
-        openai.api_key = st.secrets["openai_api_key"]
-        
+    with st.container(): 
+        st.title("🤖 Simple Chatbot with Adashboard")
+        client = ollama.Client()
+        model  = "granite3-dense:2b"
+
         if "messages" not in st.session_state:
-            st.session_state["messages"] = [{"role": "system", "content": "You are a helpful assistant."}]
-        
-        # Display previous messages
+            st.session_state["messages"] = [{"role": "assistant", "content": "Hi! How can I help you today?"}]
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
-        
-        # User input
         user_input = st.chat_input("Type your message...")
         if user_input:
             st.session_state.messages.append({"role": "user", "content": user_input})
@@ -260,10 +254,6 @@ elif st.session_state.page == "Dashboard":
                 st.markdown(user_input)
             with st.chat_message("assistant"):
                 with st.spinner("Thinking..."):
-                    response = openai.ChatCompletion.create(
-                        model="gpt-4o-mini",
-                        messages=st.session_state.messages,
-                    )
-                    assistant_message = response.choices[0].message["content"]
-                    st.session_state.messages.append({"role": "assistant", "content": assistant_message})
-                    st.markdown(assistant_message)
+                    response = client.generate(model=model, prompt=(user_input))
+                    st.markdown(response.response)
+            st.session_state.messages.append({"role": "assistant", "content": response.response})
