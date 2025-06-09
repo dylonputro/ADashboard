@@ -15,12 +15,16 @@ from darts.metrics import mape
 
 # App Config
 st.set_page_config(page_title="Dashboard Group 15", layout="wide", page_icon="📊")
-# Set background merah
+
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #FFFFFF;
+        background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fkoinworks.com%2Fblog%2Fumkm-adalah%2F&psig=AOvVaw0_uXaZSDV5cKY7vrbnmMIJ&ust=1749569853261000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKitjOHV5I0DFQAAAAAdAAAAABAE');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
     /* Sidebar background */
     [data-testid="stSidebar"] {
@@ -34,6 +38,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 # === Session State Setup ===
 if "page" not in st.session_state:
     st.session_state.page = "Upload Data"
