@@ -16,26 +16,6 @@ from darts.metrics import mape
 # App Config
 st.set_page_config(page_title="Dashboard Group 15", layout="wide", page_icon="📊")
 
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-    [data-testid="stSidebar"] {
-        background-color: #333333;
-    }
-    [data-testid="stSidebar"] * {
-        color: white;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # === Session State Setup ===
 if "page" not in st.session_state:
