@@ -76,7 +76,7 @@ if st.session_state.page == "Upload Data":
                     )
                 if st.button("Fix Column Names"):
                     st.session_state.df = prepro.fix_column_name(st.session_state.df, st.session_state.column_mapping)
-                    st.experimental_rerun()
+                    st.rerun()
 
             if st.button("Proceed to Dashboard"):
                 st.session_state.df = prepro.clean_data(st.session_state.df)
