@@ -20,17 +20,15 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fkoinworks.com%2Fblog%2Fumkm-adalah%2F&psig=AOvVaw0_uXaZSDV5cKY7vrbnmMIJ&ust=1749569853261000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKitjOHV5I0DFQAAAAAdAAAAABAE');
+        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
     }
-    /* Sidebar background */
     [data-testid="stSidebar"] {
         background-color: #333333;
     }
-    /* Optional: warna tulisan di sidebar */
     [data-testid="stSidebar"] * {
         color: white;
     }
