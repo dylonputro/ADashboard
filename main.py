@@ -15,7 +15,17 @@ from darts.metrics import mape
 
 # App Config
 st.set_page_config(page_title="Dashboard Group 15", layout="wide", page_icon="📊")
-
+# Set background merah
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #ff0000;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # === Session State Setup ===
 if "page" not in st.session_state:
     st.session_state.page = "Upload Data"
