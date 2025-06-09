@@ -24,7 +24,7 @@ if "column_mapping" not in st.session_state:
 
 # Sidebar Navigation
 with st.sidebar:
-    st.title("📁 Navigation")
+    st.title("Navigation")
     st.markdown("Select a section below:")
     page = st.radio("Menu", ["Upload Data", "Dashboard", "Chatbot"])
 
@@ -86,98 +86,183 @@ elif st.session_state.page == "Dashboard":
     groupByHour = prepro.prep_grouphour(st.session_state.df)
     groupByProduct = prepro.prep_groupProduct(st.session_state.df)
     groupByKategori = prepro.prep_groupKategori(st.session_state.df)
+    #Sales Dashboard
+    with st.container():
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number+delta",
+                    value=salesVsTime['nominal_transaksi'].mean(),
+                    title={"text": "Rata-Rata Pemasukan Harian"},
+                    delta={"reference": salesVsTime['nominal_transaksi'].mean() - (salesVsTime["nominal_transaksi"].iloc[-1] - salesVsTime["nominal_transaksi"].iloc[-2]), "relative": False, "increasing": {"color": "green"}, "decreasing": {"color": "red"}},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col2:
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number+delta",
+                    value=salesVsTime['banyak_produk'].mean(),
+                    title={"text": "Rata-Rata Produk Harian"},
+                    delta={"reference": salesVsTime['banyak_produk'].mean() - (salesVsTime["banyak_produk"].iloc[-1] - salesVsTime["banyak_produk"].iloc[-2]), "relative": False, "increasing": {"color": "green"}, "decreasing": {"color": "red"}},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col3:
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number+delta",
+                    value=salesVsTime['banyak_transaksi'].mean(),
+                    title={"text": "Rata-Rata Transaksi Dalam Harian"},
+                    delta={"reference": salesVsTime['banyak_transaksi'].mean() - (salesVsTime["banyak_transaksi"].iloc[-1] - salesVsTime["banyak_transaksi"].iloc[-2]), "relative": False, "increasing": {"color": "green"}, "decreasing": {"color": "red"}},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with st.container():
+            col1, col2= st.columns(2)
+            with col1:
+                fig = px.line(salesVsTime, x="Tanggal & Waktu", y="banyak_transaksi", title="Banyak Transaksi Seiring Waktu")
+                st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader("📈 Daily Metrics Overview")
-    col1, col2, col3 = st.columns(3)
-
-    def create_indicator(value, title, delta):
-        fig = go.Figure()
-        fig.add_trace(go.Indicator(
-            mode="number+delta",
-            value=value,
-            delta={"reference": value - delta, "relative": False,
-                   "increasing": {"color": "green"}, "decreasing": {"color": "red"}},
-            title={"text": title},
-            number={"font": {"size": 60, "color": "#1F2A44"}}
-        ))
-        fig.update_layout(height=150)
-        return fig
-
-    col1.plotly_chart(create_indicator(salesVsTime['nominal_transaksi'].mean(),
-                                       "Rata-Rata Pemasukan Harian",
-                                       salesVsTime["nominal_transaksi"].iloc[-1] - salesVsTime["nominal_transaksi"].iloc[-2]), use_container_width=True)
-
-    col2.plotly_chart(create_indicator(salesVsTime['banyak_produk'].mean(),
-                                       "Rata-Rata Produk Harian",
-                                       salesVsTime["banyak_produk"].iloc[-1] - salesVsTime["banyak_produk"].iloc[-2]), use_container_width=True)
-
-    col3.plotly_chart(create_indicator(salesVsTime['banyak_transaksi'].mean(),
-                                       "Rata-Rata Transaksi Harian",
-                                       salesVsTime["banyak_transaksi"].iloc[-1] - salesVsTime["banyak_transaksi"].iloc[-2]), use_container_width=True)
-
-    st.divider()
-    st.subheader("🕒 Waktu vs Aktivitas Transaksi")
-    col1, col2 = st.columns(2)
-
-    col1.plotly_chart(px.line(salesVsTime, x="Tanggal & Waktu", y="banyak_transaksi", title="Banyak Transaksi Seiring Waktu"), use_container_width=True)
-    col2.plotly_chart(px.line(groupByHour, x="Jam", y="Jumlah_produk", title="Jumlah Produk per Jam"), use_container_width=True)
-
-    col3, col4 = st.columns(2)
-    col3.plotly_chart(px.line(salesVsTime, x="Tanggal & Waktu", y="banyak_jenis_produk", title="Ragam Produk Seiring Waktu"))
-
-    # Forecasting
-    with col4:
-        loaded_model = NBEATSModel.load("forecasting_model20.pth")
-        loaded_scaler = joblib.load("scaler.save")
-        forecast_scaled = loaded_model.predict(n=7)
-        forecast_actual = loaded_scaler.inverse_transform(forecast_scaled)
-        forecast_dates = forecast_actual.time_index
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=salesVsTime['Tanggal & Waktu'], y=salesVsTime['nominal_transaksi'], mode='lines', name='Actual'))
-        fig.add_trace(go.Scatter(x=forecast_dates, y=forecast_actual.univariate_values(), mode='lines', name='Forecast', line=dict(dash='dash')))
-        fig.update_layout(title="🔮 Forecast Penjualan 7 Hari ke Depan")
-        st.plotly_chart(fig)
-
-    st.divider()
-    st.subheader("🛍️ Produk & Kategori")
-
-    top_5 = groupByProduct.nlargest(8, "Jumlah_produk")
-    other_total = groupByProduct.loc[~groupByProduct["Nama Produk"].isin(top_5["Nama Produk"]), "Jumlah_produk"].sum()
-    other_row = pd.DataFrame([{"Nama Produk": "Other", "Jumlah_produk": other_total}])
-    top_5 = pd.concat([top_5, other_row], ignore_index=True)
-
-    col1, col2 = st.columns(2)
-    col1.plotly_chart(px.pie(top_5, names="Nama Produk", values="Jumlah_produk", hole=0.4, title="Produk Terlaris"))
-    col2.plotly_chart(px.line(st.session_state.df, x="Tanggal & Waktu", y="Jumlah Produk", color="Kategori", title="Tren Produk per Kategori"))
-
-    col3, col4 = st.columns(2)
-    col3.plotly_chart(px.bar(groupByKategori, x="Kategori", y="Total_omset", color="Kategori", title="Omset per Kategori"))
-    col4.plotly_chart(px.scatter(st.session_state.df, x="Jumlah Produk", y="Harga Produk", color="Kategori", title="Harga vs Jumlah Produk"))
-
-    st.divider()
-    st.subheader("👥 Customer Segmentation")
+            with col2:
+                fig = px.line(groupByHour, x="Jam", y="Jumlah_produk", title="Rata-rata Banyak Produk yang dipesan dalam Seharian")
+                st.plotly_chart(fig, use_container_width=True)                
+        with st.container():
+            col1, col2 = st.columns(2)
+            with col1:
+                fig = px.line(salesVsTime, x="Tanggal & Waktu", y="banyak_jenis_produk", title="Banyak Ragam Produk Seiring Waktu")
+                st.plotly_chart(fig)
+            with col2:
+                 loaded_model = NBEATSModel.load("forecasting_model20.pth")
+                 loaded_scaler = joblib.load("scaler.save")
+                 forecast_loaded_scaled = loaded_model.predict(n=7)
+                 forecast_loaded_actual = loaded_scaler.inverse_transform(forecast_loaded_scaled)
+                 forecast_loaded_values = forecast_loaded_actual.univariate_values()
+                 forecast_loaded_dates = forecast_loaded_actual.time_index
+                 fig = go.Figure()
+                 fig.add_trace(go.Scatter(
+                      x=salesVsTime['Tanggal & Waktu'],
+                      y=salesVsTime['nominal_transaksi'],
+                      mode='lines',
+                      name='actual',
+                      line=dict(color='blue')
+                      ))
+                 fig.add_trace(go.Scatter(
+                      x=forecast_loaded_dates,
+                      y=forecast_loaded_values,
+                      mode='lines',
+                      name='Forecast',
+                      line=dict(color='red', dash='dash')
+                      ))
+                 fig.update_layout(
+                      title='Prediksi Total Penjualan 7 Hari ke Depan',
+                      xaxis_title='Tanggal',
+                      yaxis_title='Total Penjualan'
+                      )
+                 st.plotly_chart(fig)
+    #Product Dashboard             
+    with st.container() : 
+        col21, col22 = st.columns(2)
+        with col21 :    
+            top_5 = groupByProduct.nlargest(8, "Jumlah_produk")
+            other_total = groupByProduct.loc[~groupByProduct["Nama Produk"].isin(top_5["Nama Produk"]), "Jumlah_produk"].sum()
+            other_row = pd.DataFrame([{"Nama Produk": "Other", "Jumlah_produk": other_total}])
+            top_5 = pd.concat([top_5, other_row], ignore_index=True)
+            fig = px.pie(top_5, names="Nama Produk", values="Jumlah_produk", hole=0.4, title="Donut chart Produk")
+            st.plotly_chart(fig)
+        with col22 : 
+            fig = px.line(st.session_state.df, x="Tanggal & Waktu", y="Jumlah Produk", color="Kategori", title="Line Chart dengan Banyak Garis Berdasarkan Kategori")
+            st.plotly_chart(fig)
+        col31, col32 = st.columns(2)
+        with col31 :
+            fig = px.bar(groupByKategori, x="Kategori", y="Total_omset", title="Bar Plot Berdasarkan Kategori", color="Kategori")
+            st.plotly_chart(fig)
+        with col32 : 
+            fig = px.scatter(st.session_state.df, x="Jumlah Produk", y="Harga Produk", color="Kategori", title="Scatter Plot Berdasarkan Kategori", size_max=10, symbol="Kategori")
+            st.plotly_chart(fig)
+    #customer segmentation dashboard
     groupByCustomer = prepro.customer_segmentation(groupByCustomer)
-    valueCCount = groupByCustomer["cluster"].value_counts().reset_index()
-    valueCCount.columns = ["cluster", "count"]
-
-    st.plotly_chart(px.bar(valueCCount, x="cluster", y="count", color="cluster", title="Distribusi Cluster Customer"))
-
-    optionCluster = ["All"] + groupByCustomer["cluster"].unique().tolist()
-    selected = st.selectbox("Select Cluster:", optionCluster)
-    if selected != "All":
-        groupByCustomer = groupByCustomer[groupByCustomer["cluster"] == selected]
-
-    cols = st.columns(4)
-    metrics = [("totSpen", "Pengeluaran Rata-rata"),
-               ("totJum", "Jumlah Produk Rata-rata"),
-               ("totJenPro", "Jenis Produk Rata-rata"),
-               ("totKat", "Kategori Produk Rata-rata")]
-
-    for i, (colname, title) in enumerate(metrics):
-        fig = go.Figure()
-        fig.add_trace(go.Indicator(mode="number", value=groupByCustomer[colname].mean(), title={"text": title}))
-        fig.update_layout(height=150)
-        cols[i].plotly_chart(fig, use_container_width=True)
+    with st.container() :     
+        valueCCount= groupByCustomer["cluster"].value_counts().reset_index()
+        valueCCount.columns = ["cluster", "count"]
+        fig = px.bar(valueCCount, x="cluster", y="count", color="cluster", title="Bar Chart Jumlah Produk per Kategori")
+        fig.update_layout(
+                    width=800,  
+                    height=400  
+        )
+        st.plotly_chart(fig)
+        optionCluster = ["All"] + groupByCustomer["cluster"].unique().tolist()
+        option1 = st.selectbox("What cluster ?", optionCluster)
+        if option1 == "All" :
+            clusteringmask = groupByCustomer.copy()
+        else :
+            clusteringmask = groupByCustomer[groupByCustomer["cluster"] == option1].copy().reset_index()    
+        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+        with col1:    
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number",
+                    value=clusteringmask['totSpen'].mean(),
+                    title={"text": "Rata-Rata Pengeluaran customer"},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col2:
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number",
+                    value=clusteringmask['totJum'].mean(),
+                    title={"text": "Rata-Rata Jumlah produk"},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col3:
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number",
+                    value=clusteringmask['totJenPro'].mean(),
+                    title={"text": "Rata-Rata jumlah jenis produk"},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col4:
+                fig = go.Figure()
+                fig.add_trace(go.Indicator(
+                    mode="number",
+                    value=clusteringmask['totKat'].mean(),
+                    title={"text": "Rata-Rata jumlah Kategori pesanan"},
+                    number={"font": {"size": 60, "color": "#1F2A44"}}
+                ))
+                fig.update_layout(
+                    width=400,  
+                    height=150  
+                )
+                st.plotly_chart(fig, use_container_width=True)
 
 # Chatbot Page
 elif st.session_state.page == "Chatbot":
