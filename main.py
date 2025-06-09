@@ -22,6 +22,14 @@ st.markdown(
     .stApp {
         background-color: #808080;
     }
+    /* Sidebar background */
+    [data-testid="stSidebar"] {
+        background-color: #333333;
+    }
+    /* Optional: warna tulisan di sidebar */
+    [data-testid="stSidebar"] * {
+        color: white;
+    }
     </style>
     """,
     unsafe_allow_html=True
