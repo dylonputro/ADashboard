@@ -81,7 +81,7 @@ if st.session_state.page == "Upload Data":
             if st.button("Proceed to Dashboard"):
                 st.session_state.df = prepro.clean_data(st.session_state.df)
                 st.session_state.page = "Dashboard"
-                st.experimental_rerun()
+                st.rerun()
         except Exception as e:
             st.error(f"Error loading file: {e}")
 
@@ -224,7 +224,7 @@ elif st.session_state.page == "Dashboard":
 
         if st.button("Back to Upload"):
             st.session_state.page = "Upload Data"
-            st.experimental_rerun()
+            st.rerun()
 
 # === Page: Chatbot ===
 elif st.session_state.page == "Chatbot":
@@ -247,4 +247,4 @@ elif st.session_state.page == "Chatbot":
         except Exception as e:
             response = f"Error: {e}"
         st.session_state.messages.append({"role": "assistant", "content": response})
-        st.experimental_rerun()
+        st.rerun()
