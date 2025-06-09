@@ -20,7 +20,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-color: #808080;
+        background-color: #FFFFFF;
     }
     /* Sidebar background */
     [data-testid="stSidebar"] {
